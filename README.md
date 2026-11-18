@@ -1,0 +1,91 @@
+# Quizlam
+
+A real-time Islamic word-guessing game for families and young learners. A host runs the game from a dashboard, players buzz in from their phones, and a TV screen shows the question, hidden answer tiles, timer, and scoreboard.
+
+## Features
+
+- Host dashboard with room code, QR code, local buzzers, and full game controls.
+- Phone players join with a nickname and avatar; reconnect with a stored session token.
+- TV view designed for a big screen (`/tv/[code]`).
+- Server-authoritative buzzer ordering, timer, scoring, letter reveals, and answer validation.
+- 150 bilingual questions across 10 categories, with a PIN-protected parent editor.
+- English/Turkish interface and questions.
+- Individual, team, family, tournament, and daily-challenge modes.
+- Saved game history and answer review.
+
+## Requirements
+
+- Node.js 20+
+- npm
+
+## Setup
+
+```bash
+npm install
+npm run db:seed
+npm run dev
+```
+
+Open <http://localhost:3000>. The custom dev server runs Next.js and Socket.IO together.
+
+Optional environment variables:
+
+```bash
+PORT=3000
+PARENT_PIN=1234
+```
+
+`PARENT_PIN` defaults to `1234` for local development. Change it before exposing the app publicly.
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start Next.js and Socket.IO in development mode |
+| `npm run build` | Build Next.js and bundle the custom server |
+| `npm start` | Run the production build |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript checks |
+| `npm test` | Run Vitest engine tests |
+| `npm run db:seed` | Seed the SQLite question bank |
+| `npm run db:migrate` | Apply Drizzle migrations |
+
+## Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Landing page |
+| `/create` | Create a game room |
+| `/join?code=CODE` | Join with a room code |
+| `/host/[code]` | Host dashboard |
+| `/tv/[code]` | Big-screen game view |
+| `/play/[code]` | Player buzzer and answer screen |
+| `/results/[code]` | Final scores and answer review |
+| `/how-to` | Rules |
+| `/settings` | Preferences and defaults |
+| `/parent` | PIN-protected question editor |
+| `/history` | Saved games |
+| `/daily` | Start today's challenge |
+
+## Game rules
+
+- The answer starts as hidden letter tiles. Spaces and punctuation are shown but cannot be revealed.
+- The first valid buzzer press wins the turn; later buzzes are rejected.
+- Each revealed letter costs 100 points from that word.
+- A correct answer awards the remaining points.
+- A wrong answer or timeout applies the configured penalty and locks that player out of the current question.
+- If every eligible player is locked out, the answer is revealed and the round ends.
+
+## Architecture
+
+- `src/app`: Next.js App Router pages and shared UI.
+- `src/components`: Presentational components, layouts, and game widgets.
+- `src/hooks/useGameRoom.ts`: Client hook for room snapshots and Socket.IO events.
+- `src/lib/domain.ts`: Shared types and constants.
+- `src/lib/scoring.ts`: Answer normalization and scoring helpers.
+- `server/game/engine.ts`: Authoritative in-memory game engine.
+- `server/sockets.ts`: Socket.IO event contract, authorization, and broadcasts.
+- `server/api.ts`: REST endpoints for health, questions, and history.
+- `server/db`: SQLite/Drizzle schema, repository, and question seed.
+
+Room state is currently in memory; question and game history are persisted to SQLite in `data/quizlam.db`.

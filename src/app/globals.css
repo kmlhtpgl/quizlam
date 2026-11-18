@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #101b36;
+  --color-navy-light: #1a2b52;
+  --color-emerald: #009b77;
+  --color-emerald-light: #14c49a;
+  --color-gold: #f5c451;
+  --color-cream: #fff8e7;
+  --font-display: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-body: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-navy);
+  color: var(--color-cream);
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+.pattern-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(245, 196, 81, 0.09) 0 2px, transparent 2px),
+    radial-gradient(circle at 80% 60%, rgba(20, 196, 154, 0.09) 0 2px, transparent 2px),
+    repeating-linear-gradient(45deg, rgba(255, 248, 231, 0.018) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(-45deg, rgba(255, 248, 231, 0.018) 0 1px, transparent 1px 18px);
+  animation: patternDrift 28s linear infinite alternate;
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(255, 248, 231, 0.1), rgba(255, 248, 231, 0.035));
+  border: 1px solid rgba(255, 248, 231, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+}
+
+.glass-card-strong {
+  background: linear-gradient(145deg, rgba(26, 43, 82, 0.96), rgba(16, 27, 54, 0.96));
+  border: 1px solid rgba(245, 196, 81, 0.2);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+}
+
+.gold-text {
+  background: linear-gradient(100deg, #f5c451, #fff2b8, #f5c451);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.btn-glow {
+  box-shadow: 0 0 0 1px rgba(245, 196, 81, 0.22), 0 18px 40px rgba(0, 155, 119, 0.28);
+}
+
+.buzzer-glow {
+  box-shadow:
+    0 0 0 8px rgba(245, 196, 81, 0.09),
+    0 0 36px rgba(245, 196, 81, 0.45),
+    0 24px 70px rgba(0, 155, 119, 0.4);
+  animation: buzzerPulse 1.7s ease-in-out infinite;
+}
+
+.tile-flip {
+  animation: tileFlip 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pop-in {
+  animation: popIn 0.45s cubic-bezier(0.2, 0.9, 0.2, 1.2) both;
+}
+
+.slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.score-pop {
+  animation: scorePop 0.7s ease-out;
+}
+
+.timer-urgent {
+  animation: timerUrgent 0.65s ease-in-out infinite alternate;
+}
+
+@keyframes patternDrift {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(-18px, -12px, 0) rotate(2deg);
+  }
+}
+
+@keyframes buzzerPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.025);
+    filter: brightness(1.13);
+  }
+}
+
+@keyframes tileFlip {
+  0% {
+    transform: rotateX(90deg) scale(0.8);
+    opacity: 0.2;
+  }
+  100% {
+    transform: rotateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.86);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scorePop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.16);
+    color: var(--color-gold);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes timerUrgent {
+  from {
+    filter: drop-shadow(0 0 3px rgba(255, 92, 92, 0.4));
+  }
+  to {
+    filter: drop-shadow(0 0 16px rgba(255, 92, 92, 0.95));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
