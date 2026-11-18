@@ -15,7 +15,7 @@ A real-time Islamic word-guessing game for families and young learners. A host r
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22.14+ (24.x recommended)
 - npm
 
 ## Setup
@@ -52,6 +52,7 @@ Blueprint settings:
 | Setting | Value |
 | --- | --- |
 | Runtime | Node |
+| Node version | 24.22.1 |
 | Plan | Free |
 | Build command | `npm ci && npm run build` |
 | Start command | `npm start` |

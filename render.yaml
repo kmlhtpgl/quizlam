@@ -12,7 +12,7 @@ services:
     autoDeployTrigger: commit
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "24.22.1"
       - key: DATABASE_PATH
         value: /tmp/quizlam.db
       - key: PARENT_PIN
