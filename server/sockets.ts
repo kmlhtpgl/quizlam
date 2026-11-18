@@ -166,7 +166,9 @@ export function setupSockets(io: IOServer, engine: GameEngine, questionBank: Que
         apply(joined.events, input.code);
         ack?.({
           ok: true,
-          ...joined.value,
+          code: input.code,
+          playerId: joined.value.playerId,
+          token: joined.value.token,
           snapshot: engine.getSnapshot(input.code, { playerToken: joined.value.token }),
         });
       } catch (error) {

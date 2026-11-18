@@ -36,20 +36,19 @@ function JoinForm() {
     setBusy(false);
     if (
       !response.ok ||
-      typeof response.code !== "string" ||
       typeof response.playerId !== "string" ||
       typeof response.token !== "string"
     ) {
       setError(response.error ?? "JOIN_FAILED");
       return;
     }
-    setPlayerSession(response.code, {
+    setPlayerSession(code, {
       playerId: response.playerId,
       token: response.token,
       nickname,
       avatar,
     });
-    router.push(`/play/${response.code}`);
+    router.push(`/play/${code}`);
   }
 
   return (
