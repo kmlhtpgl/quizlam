@@ -2,6 +2,9 @@
   "name": "quizlam",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "tsx watch server/index.ts",
     "build": "next build && tsup server/index.ts --format cjs --platform node --out-dir dist-server --external next --external better-sqlite3",

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: quizlam
+    runtime: node
+    plan: free
+    branch: main
+    numInstances: 1
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_PATH
+        value: /tmp/quizlam.db
+      - key: PARENT_PIN
+        sync: false
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"

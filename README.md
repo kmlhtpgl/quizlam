@@ -37,6 +37,37 @@ PARENT_PIN=1234
 
 `PARENT_PIN` defaults to `1234` for local development. Change it before exposing the app publicly.
 
+## Deploy to Render Free
+
+The repository includes a `render.yaml` Blueprint for a free Render Web Service.
+
+1. Push the repository to GitHub.
+2. In Render, click **New → Blueprint**.
+3. Connect `kmlhtpgl/quizlam` and use the `main` branch.
+4. Set `PARENT_PIN` when Render prompts for it.
+5. Deploy and open the generated `onrender.com` URL.
+
+Blueprint settings:
+
+| Setting | Value |
+| --- | --- |
+| Runtime | Node |
+| Plan | Free |
+| Build command | `npm ci && npm run build` |
+| Start command | `npm start` |
+| Health check | `/api/health` |
+| Instances | 1 |
+| Database path | `/tmp/quizlam.db` |
+
+Render Free limitations:
+
+- The service sleeps after 15 minutes without HTTP or WebSocket traffic; the first request after sleep takes about one minute.
+- The SQLite database is ephemeral. The question bank is reseeded automatically, but parent edits and saved history reset on sleep, restart, or redeploy.
+- Persistent disks, SSH, and multiple instances are not available on the free plan.
+- Free Render Postgres expires after 30 days, so it is not used here.
+
+Manual web service setup uses the same build command, start command, health check, and environment variables.
+
 ## Scripts
 
 | Command | Description |
