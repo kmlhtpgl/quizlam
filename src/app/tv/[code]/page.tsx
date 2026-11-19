@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { Crown, Radio, Trophy } from "lucide-react";
 import { useApp } from "@/components/layout/Providers";
@@ -11,12 +12,17 @@ import { LetterTiles } from "@/components/game/LetterTiles";
 import { ResultOverlay } from "@/components/game/ResultOverlay";
 import { Scoreboard } from "@/components/game/Scoreboard";
 import { GameEventSounds } from "@/components/game/GameEventSounds";
+import { QRCodeImage } from "@/components/ui/QRCodeImage";
 
 export default function TvPage() {
   const params = useParams<{ code: string }>();
   const code = (params.code ?? "").toUpperCase();
   const { t } = useApp();
   const { snapshot, connected, events } = useGameRoom(code, "viewer");
+  const joinUrl = useMemo(
+    () => (typeof window === "undefined" ? "" : `${window.location.origin}/join?code=${code}`),
+    [code],
+  );
 
   if (!snapshot) {
     return <div className="flex min-h-screen items-center justify-center text-cream/60">{t("common.loading")}</div>;
@@ -49,7 +55,14 @@ export default function TvPage() {
               <p className="text-lg font-black uppercase tracking-[0.3em] text-gold">{code}</p>
               <h1 className="mt-6 text-5xl font-black text-cream sm:text-7xl">{t("tv.getReady")}</h1>
               <p className="mt-6 text-xl text-cream/60">{t("tv.noQuestion")}</p>
-              <div className="mt-12 flex flex-wrap justify-center gap-4">
+              <div className="mt-10 flex flex-col items-center gap-3">
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-cream/60">{t("tv.scanToJoin")}</p>
+                <div className="rounded-3xl bg-cream p-3">
+                  <QRCodeImage value={joinUrl} size={220} />
+                </div>
+                <p className="text-lg font-bold text-cream/70">{t("tv.scanHint", { code })}</p>
+              </div>
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
                 {snapshot.players.map((player) => (
                   <div key={player.id} className="flex flex-col items-center gap-2">
                     <AvatarIcon avatar={player.avatar} size="lg" active={player.connected} />

@@ -178,6 +178,8 @@ export const en = {
   "tv.answerIs": "Answer",
   "tv.hostRevealed": "Host revealed the answer",
   "tv.noQuestion": "Waiting for the host to start the game.",
+  "tv.scanToJoin": "Scan to join the game",
+  "tv.scanHint": "Use your phone camera, or enter room code {code} on the join page.",
 
   "results.title": "Game results",
   "results.champion": "Champion!",
@@ -430,6 +432,8 @@ export const tr: Record<TranslationKey, string> = {
   "tv.answerIs": "Cevap",
   "tv.hostRevealed": "Sunucu cevabı açıkladı",
   "tv.noQuestion": "Sunucunun oyunu başlatması bekleniyor.",
+  "tv.scanToJoin": "Oyuna katılmak için tara",
+  "tv.scanHint": "Telefonunun kamerasını kullan veya katılım sayfasında {code} oda kodunu gir.",
 
   "results.title": "Oyun sonuçları",
   "results.champion": "Şampiyon!",

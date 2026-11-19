@@ -22,7 +22,7 @@ export function QRCodeImage({ value, size = 180 }: { value: string; size?: numbe
     };
   }, [value, size]);
 
-  if (!dataUrl) return <div className="h-[180px] w-[180px] animate-pulse rounded-2xl bg-cream/10" />;
+  if (!dataUrl) return <div className="animate-pulse rounded-2xl bg-cream/10" style={{ width: size, height: size }} />;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
