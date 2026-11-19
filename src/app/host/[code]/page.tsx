@@ -23,7 +23,7 @@ export default function HostPage() {
   const params = useParams<{ code: string }>();
   const code = (params.code ?? "").toUpperCase();
   const { t, language } = useApp();
-  const { snapshot, connected, lastEvent, emit, hostToken } = useGameRoom(code, "host");
+  const { snapshot, connected, events, emit, hostToken } = useGameRoom(code, "host");
   const [newName, setNewName] = useState("");
   const [newAvatar, setNewAvatar] = useState<Avatar>("fox");
   const [copied, setCopied] = useState(false);
@@ -77,7 +77,7 @@ export default function HostPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <GameEventSounds event={lastEvent?.event ?? null} />
+      <GameEventSounds events={events} />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <Pill tone="emerald">{connected ? t("common.connected") : t("common.disconnected")}</Pill>

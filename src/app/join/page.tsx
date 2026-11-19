@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { AvatarIcon } from "@/components/ui/Avatar";
 import { setPlayerSession } from "@/lib/session";
 import { emitWithAck } from "@/lib/socket";
+import { playSound, unlockAudio } from "@/lib/sound";
 
 export default function JoinPage() {
   return (
@@ -22,7 +23,7 @@ export default function JoinPage() {
 function JoinForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useApp();
+  const { t, soundEnabled } = useApp();
   const [code, setCode] = useState(() => (searchParams.get("code") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6));
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState<Avatar>("fox");
@@ -30,6 +31,7 @@ function JoinForm() {
   const [error, setError] = useState("");
 
   async function join() {
+    unlockAudio();
     setBusy(true);
     setError("");
     const response = await emitWithAck("room:join", { code, nickname, avatar });
@@ -48,6 +50,7 @@ function JoinForm() {
       nickname,
       avatar,
     });
+    playSound("join", soundEnabled);
     router.push(`/play/${code}`);
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { EngineEvent, RoomSnapshot } from "@/lib/domain";
 import { getPlayerSession, getHostSession } from "@/lib/session";
 import {
@@ -14,14 +14,15 @@ import {
 
 export type RoomRole = "host" | "player" | "viewer";
 
-interface GameEventEnvelope {
+export interface GameEventEnvelope {
   event: EngineEvent;
   id: number;
 }
 
 export function useGameRoom(code: string, role: RoomRole) {
   const [snapshot, setSnapshot] = useState<RoomSnapshot | null>(null);
-  const [lastEvent, setLastEvent] = useState<GameEventEnvelope | null>(null);
+  const [events, setEvents] = useState<GameEventEnvelope[]>([]);
+  const eventId = useRef(0);
   const connected = useSyncExternalStore(subscribeConnection, getConnectionSnapshot, getServerConnectionSnapshot);
 
   const hostToken = useMemo(() => (role === "host" ? getHostSession(code) : null), [code, role]);
@@ -48,7 +49,10 @@ export function useGameRoom(code: string, role: RoomRole) {
     };
     const onConnect = () => request();
     const onState = (state: RoomSnapshot) => setSnapshot(state);
-    const onEvent = (event: EngineEvent) => setLastEvent({ event, id: Date.now() });
+    const onEvent = (event: EngineEvent) => {
+      eventId.current += 1;
+      setEvents((current) => [...current, { event, id: eventId.current }].slice(-64));
+    };
 
     socket.on("connect", onConnect);
     socket.on("state", onState);
@@ -64,5 +68,5 @@ export function useGameRoom(code: string, role: RoomRole) {
 
   const emit = useCallback((event: string, payload: unknown) => emitWithAck(event, payload), []);
 
-  return { snapshot, connected, lastEvent, emit, hostToken, playerToken };
+  return { snapshot, connected, events, lastEvent: events[events.length - 1] ?? null, emit, hostToken, playerToken };
 }

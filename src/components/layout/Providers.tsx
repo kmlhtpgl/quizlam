@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { DEFAULT_CONFIG, type GameConfig, type Language } from "@/lib/domain";
 import { translate, type TranslationKey } from "@/lib/i18n";
+import { unlockAudio } from "@/lib/sound";
 
 interface AppContextValue {
   language: Language;
@@ -85,6 +86,16 @@ export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = preferences.language;
   }, [preferences.language]);
+
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   const setLanguage = useCallback((value: Language) => {
     window.localStorage.setItem("quizlam.language", value);

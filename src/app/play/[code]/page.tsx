@@ -23,7 +23,7 @@ export default function PlayerPage() {
   const code = (params.code ?? "").toUpperCase();
   const { t } = useApp();
   const session = useMemo(() => getPlayerSession(code), [code]);
-  const { snapshot, connected, lastEvent, emit } = useGameRoom(code, "player");
+  const { snapshot, connected, events, emit } = useGameRoom(code, "player");
   const [justSubmitted, setJustSubmitted] = useState(false);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function PlayerPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:py-10">
-      <GameEventSounds event={lastEvent?.event ?? null} />
+      <GameEventSounds events={events} />
       <div className="mb-5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <AvatarIcon avatar={session.avatar as Parameters<typeof AvatarIcon>[0]["avatar"]} size="sm" active={connected} />

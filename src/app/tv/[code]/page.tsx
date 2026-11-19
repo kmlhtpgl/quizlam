@@ -16,7 +16,7 @@ export default function TvPage() {
   const params = useParams<{ code: string }>();
   const code = (params.code ?? "").toUpperCase();
   const { t } = useApp();
-  const { snapshot, connected, lastEvent } = useGameRoom(code, "viewer");
+  const { snapshot, connected, events } = useGameRoom(code, "viewer");
 
   if (!snapshot) {
     return <div className="flex min-h-screen items-center justify-center text-cream/60">{t("common.loading")}</div>;
@@ -28,7 +28,7 @@ export default function TvPage() {
 
   return (
     <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-7 sm:px-10">
-      <GameEventSounds event={lastEvent?.event ?? null} />
+      <GameEventSounds events={events} />
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl font-black tracking-[0.18em] text-gold">QUIZLAM</span>

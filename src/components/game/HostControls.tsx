@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { RoomSnapshot } from "@/lib/domain";
 import { useApp } from "@/components/layout/Providers";
 import { Button } from "@/components/ui/Button";
+import { unlockAudio } from "@/lib/sound";
 
 export function HostControls({
   snapshot,
@@ -17,7 +18,10 @@ export function HostControls({
 }) {
   const { t } = useApp();
   const base = { code: snapshot.code, hostToken };
-  const send = (event: string) => void emit(event, base);
+  const send = (event: string) => {
+    unlockAudio();
+    void emit(event, base);
+  };
   const active = snapshot.phase === "buzzer_open" || snapshot.phase === "answering";
   return (
     <div className="flex flex-wrap gap-2">
