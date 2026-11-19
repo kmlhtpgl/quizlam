@@ -15,7 +15,7 @@ export function normalizeAnswer(value: string): string {
 }
 
 export function isRevealable(char: string): boolean {
-  return /[A-Z0-9]/i.test(char);
+  return /^[\p{L}\p{N}]$/u.test(char);
 }
 
 export function buildTiles(answer: string): TileView[] {
