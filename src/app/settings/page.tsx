@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShieldCheck, Volume2 } from "lucide-react";
+import { Music, ShieldCheck, Volume2 } from "lucide-react";
 import { CATEGORIES, DIFFICULTIES, type GameConfig } from "@/lib/domain";
 import { useApp } from "@/components/layout/Providers";
 import { Button } from "@/components/ui/Button";
@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 
 export default function SettingsPage() {
-  const { t, language, setLanguage, soundEnabled, setSoundEnabled, defaults, setDefaults } = useApp();
+  const { t, language, setLanguage, soundEnabled, setSoundEnabled, musicEnabled, setMusicEnabled, defaults, setDefaults } = useApp();
   const [configOverride, setConfigOverride] = useState<GameConfig | null>(null);
   const config = configOverride ?? defaults;
   const [saved, setSaved] = useState(false);
@@ -52,6 +52,20 @@ export default function SettingsPage() {
                   {t("common.on")}
                 </Button>
                 <Button variant={!soundEnabled ? "primary" : "ghost"} onClick={() => setSoundEnabled(false)}>
+                  {t("common.off")}
+                </Button>
+              </div>
+            </div>
+            <div>
+              <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cream/55">
+                <Music size={14} />
+                {t("settings.musicLabel")}
+              </span>
+              <div className="flex gap-2">
+                <Button variant={musicEnabled ? "primary" : "ghost"} onClick={() => setMusicEnabled(true)}>
+                  {t("common.on")}
+                </Button>
+                <Button variant={!musicEnabled ? "primary" : "ghost"} onClick={() => setMusicEnabled(false)}>
                   {t("common.off")}
                 </Button>
               </div>

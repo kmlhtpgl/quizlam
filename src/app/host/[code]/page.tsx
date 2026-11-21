@@ -18,6 +18,7 @@ import { HostControls } from "@/components/game/HostControls";
 import { LetterTiles } from "@/components/game/LetterTiles";
 import { ResultOverlay } from "@/components/game/ResultOverlay";
 import { GameEventSounds } from "@/components/game/GameEventSounds";
+import { BackgroundMusic } from "@/components/game/BackgroundMusic";
 
 export default function HostPage() {
   const params = useParams<{ code: string }>();
@@ -78,6 +79,7 @@ export default function HostPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <GameEventSounds events={events} />
+      <BackgroundMusic phase={snapshot.phase} paused={snapshot.paused} roundIndex={snapshot.roundIndex} />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <Pill tone="emerald">{connected ? t("common.connected") : t("common.disconnected")}</Pill>

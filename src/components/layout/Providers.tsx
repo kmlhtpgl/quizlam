@@ -3,13 +3,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { DEFAULT_CONFIG, type GameConfig, type Language } from "@/lib/domain";
 import { translate, type TranslationKey } from "@/lib/i18n";
-import { unlockAudio } from "@/lib/sound";
+import { stopMusic, unlockAudio } from "@/lib/sound";
 
 interface AppContextValue {
   language: Language;
   setLanguage: (language: Language) => void;
   soundEnabled: boolean;
   setSoundEnabled: (enabled: boolean) => void;
+  musicEnabled: boolean;
+  setMusicEnabled: (enabled: boolean) => void;
   defaults: GameConfig;
   setDefaults: (config: GameConfig) => void;
   t: (key: TranslationKey, values?: Record<string, string | number>) => string;
@@ -18,12 +20,14 @@ interface AppContextValue {
 interface StoredPreferences {
   language: Language;
   soundEnabled: boolean;
+  musicEnabled: boolean;
   defaults: GameConfig;
 }
 
 const SERVER_PREFERENCES: StoredPreferences = {
   language: "en",
   soundEnabled: true,
+  musicEnabled: true,
   defaults: DEFAULT_CONFIG,
 };
 
@@ -38,6 +42,11 @@ function readLanguage(): Language {
 function readSound(): boolean {
   if (typeof window === "undefined") return true;
   return window.localStorage.getItem("quizlam.sound") !== "off";
+}
+
+function readMusic(): boolean {
+  if (typeof window === "undefined") return true;
+  return window.localStorage.getItem("quizlam.music") !== "off";
 }
 
 function readDefaults(): GameConfig {
@@ -55,6 +64,7 @@ function getPreferencesSnapshot(): StoredPreferences {
   const next: StoredPreferences = {
     language: readLanguage(),
     soundEnabled: readSound(),
+    musicEnabled: readMusic(),
     defaults: readDefaults(),
   };
   if (JSON.stringify(next) !== JSON.stringify(preferenceCache)) preferenceCache = next;
@@ -107,6 +117,12 @@ export function Providers({ children }: { children: ReactNode }) {
     notifyPreferences();
   }, []);
 
+  const setMusicEnabled = useCallback((value: boolean) => {
+    window.localStorage.setItem("quizlam.music", value ? "on" : "off");
+    if (!value) stopMusic();
+    notifyPreferences();
+  }, []);
+
   const setDefaults = useCallback((value: GameConfig) => {
     window.localStorage.setItem("quizlam.defaults", JSON.stringify(value));
     notifyPreferences();
@@ -123,11 +139,13 @@ export function Providers({ children }: { children: ReactNode }) {
       setLanguage,
       soundEnabled: preferences.soundEnabled,
       setSoundEnabled,
+      musicEnabled: preferences.musicEnabled,
+      setMusicEnabled,
       defaults: preferences.defaults,
       setDefaults,
       t,
     }),
-    [preferences, setLanguage, setSoundEnabled, setDefaults, t],
+    [preferences, setLanguage, setSoundEnabled, setMusicEnabled, setDefaults, t],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

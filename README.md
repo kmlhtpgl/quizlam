@@ -10,6 +10,7 @@ A real-time Islamic word-guessing game for families and young learners. A host r
 - Server-authoritative buzzer ordering, timer, scoring, letter reveals, and answer validation.
 - 750 bilingual questions across 16 categories, with a PIN-protected parent editor.
 - English/Turkish interface and questions.
+- Randomized lobby/question music and answer cues on TV/host, with separate sound and music toggles.
 - Individual, team, family, tournament, and daily-challenge modes.
 - Saved game history and answer review.
 

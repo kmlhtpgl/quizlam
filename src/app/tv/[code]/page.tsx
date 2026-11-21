@@ -12,6 +12,7 @@ import { LetterTiles } from "@/components/game/LetterTiles";
 import { ResultOverlay } from "@/components/game/ResultOverlay";
 import { Scoreboard } from "@/components/game/Scoreboard";
 import { GameEventSounds } from "@/components/game/GameEventSounds";
+import { BackgroundMusic } from "@/components/game/BackgroundMusic";
 import { QRCodeImage } from "@/components/ui/QRCodeImage";
 
 export default function TvPage() {
@@ -35,6 +36,7 @@ export default function TvPage() {
   return (
     <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-7 sm:px-10">
       <GameEventSounds events={events} />
+      <BackgroundMusic phase={snapshot.phase} paused={snapshot.paused} roundIndex={snapshot.roundIndex} />
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl font-black tracking-[0.18em] text-gold">QUIZLAM</span>

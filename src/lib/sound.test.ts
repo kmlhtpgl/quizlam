@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { EngineEvent, RoundResult } from "./domain";
-import { soundForEvent } from "./sound";
+import { AUDIO_TRACKS, pickTrack, soundForEvent } from "./sound";
 
 const result = (overrides: Partial<RoundResult> = {}): RoundResult => ({
   round: 1,
@@ -51,5 +51,29 @@ describe("game event sounds", () => {
     expect(soundForEvent(event("room:updated"))).toBeNull();
     expect(soundForEvent(event("answer:result"))).toBeNull();
     expect(soundForEvent(event("answer:result", { result: { correct: true } }))).toBeNull();
+  });
+});
+
+describe("audio tracks", () => {
+  it("has randomized pools for every phase", () => {
+    expect(AUDIO_TRACKS.lobby).toHaveLength(4);
+    expect(AUDIO_TRACKS.question).toHaveLength(7);
+    expect(AUDIO_TRACKS.correct).toHaveLength(3);
+    expect(AUDIO_TRACKS.wrong).toHaveLength(3);
+    for (const tracks of Object.values(AUDIO_TRACKS)) {
+      expect(tracks.every((src) => src.startsWith("/audio/") && src.endsWith(".mp3"))).toBe(true);
+    }
+  });
+
+  it("picks a valid track and avoids an immediate repeat", () => {
+    const first = pickTrack("lobby", () => 0);
+    const second = pickTrack("lobby", () => 0);
+    expect(AUDIO_TRACKS.lobby).toContain(first);
+    expect(AUDIO_TRACKS.lobby).toContain(second);
+    expect(second).not.toBe(first);
+  });
+
+  it("clamps an out-of-range random value", () => {
+    expect(AUDIO_TRACKS.question).toContain(pickTrack("question", () => 1));
   });
 });

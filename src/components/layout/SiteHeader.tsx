@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { BookOpen, History, Home, Settings2, Sparkles } from "lucide-react";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { MusicToggle } from "./MusicToggle";
 import { SoundToggle } from "./SoundToggle";
 import { useApp } from "./Providers";
 import clsx from "clsx";
@@ -46,6 +47,7 @@ export function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <MusicToggle />
           <SoundToggle />
         </div>
       </div>
