@@ -40,7 +40,7 @@ export default function HomePage() {
           </div>
           <div className="mt-14 grid grid-cols-3 gap-3 border-t border-white/10 pt-8 sm:gap-8">
             {[
-              { value: "150+", label: t("home.statsQuestions") },
+              { value: "750+", label: t("home.statsQuestions") },
               { value: "2-6", label: t("home.statsPlayers") },
               { value: "EN / TR", label: t("home.statsLanguages") },
             ].map((stat) => (

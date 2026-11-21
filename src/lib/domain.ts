@@ -9,6 +9,12 @@ export const CATEGORIES = [
   "Islamic Manners",
   "Islamic Places",
   "General Islamic Knowledge",
+  "Y2 Words",
+  "Y5 Words",
+  "Y8 Words",
+  "Turkish Vocabulary Easy",
+  "Turkish Vocabulary Medium",
+  "Turkish Vocabulary Hard",
 ] as const;
 
 export const DIFFICULTIES = ["easy", "medium", "hard"] as const;

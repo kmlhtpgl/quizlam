@@ -8,7 +8,7 @@ A real-time Islamic word-guessing game for families and young learners. A host r
 - Phone players join with a nickname and avatar; reconnect with a stored session token.
 - TV view designed for a big screen (`/tv/[code]`).
 - Server-authoritative buzzer ordering, timer, scoring, letter reveals, and answer validation.
-- 150 bilingual questions across 10 categories, with a PIN-protected parent editor.
+- 750 bilingual questions across 16 categories, with a PIN-protected parent editor.
 - English/Turkish interface and questions.
 - Individual, team, family, tournament, and daily-challenge modes.
 - Saved game history and answer review.

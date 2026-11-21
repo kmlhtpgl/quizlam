@@ -12,21 +12,22 @@ export interface AdminQuestion extends QuestionRecord {
 
 export function ensureSeeded(): void {
   initializeDatabase();
-  const existing = db.select({ id: questions.id }).from(questions).limit(1).all();
-  if (existing.length) return;
+  const existingIds = new Set(db.select({ id: questions.id }).from(questions).all().map((row) => row.id));
   const now = new Date().toISOString();
   for (const question of QUESTION_SEED) {
-    db.insert(questions)
-      .values({
-        id: question.id,
-        category: question.category,
-        difficulty: question.difficulty,
-        approved: question.approved,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .onConflictDoNothing()
-      .run();
+    if (!existingIds.has(question.id)) {
+      db.insert(questions)
+        .values({
+          id: question.id,
+          category: question.category,
+          difficulty: question.difficulty,
+          approved: question.approved,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing()
+        .run();
+    }
     for (const [language, translation] of Object.entries(question.translations)) {
       if (!translation) continue;
       db.insert(questionTranslations)
