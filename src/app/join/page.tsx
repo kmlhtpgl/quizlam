@@ -24,7 +24,8 @@ function JoinForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, soundEnabled } = useApp();
-  const [code, setCode] = useState(() => (searchParams.get("code") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6));
+  const isMcq = searchParams.get("game") === "mcq";
+  const [code, setCode] = useState(() => (searchParams.get("code") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState<Avatar>("fox");
   const [busy, setBusy] = useState(false);
@@ -34,7 +35,7 @@ function JoinForm() {
     unlockAudio();
     setBusy(true);
     setError("");
-    const response = await emitWithAck("room:join", { code, nickname, avatar });
+    const response = await emitWithAck(isMcq ? "mcq:join" : "room:join", { code, nickname, avatar });
     setBusy(false);
     if (
       !response.ok ||
@@ -51,7 +52,7 @@ function JoinForm() {
       avatar,
     });
     playSound("join", soundEnabled);
-    router.push(`/play/${code}`);
+    router.push(isMcq ? `/mcq/play/${code}` : `/play/${code}`);
   }
 
   return (
@@ -69,8 +70,8 @@ function JoinForm() {
             </span>
             <input
               value={code}
-              onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))}
-              placeholder="AB3K7Q"
+              onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8))}
+              placeholder={isMcq ? "MQ3K7QZ" : "AB3K7Q"}
               className="w-full rounded-2xl border border-white/15 bg-navy/70 px-4 py-4 text-center text-3xl font-black uppercase tracking-[0.4em] text-gold placeholder:text-cream/20 focus:border-gold focus:outline-none"
             />
             <span className="mt-2 block text-center text-xs text-cream/40">{t("join.codeHelp")}</span>

@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import type { GameConfig } from "@/lib/domain";
+import type { GameConfig, GameType } from "@/lib/domain";
 
 export const questions = sqliteTable("questions", {
   id: text("id").primaryKey(),
@@ -36,6 +36,7 @@ export const questionTranslations = sqliteTable(
 export const rooms = sqliteTable("rooms", {
   code: text("code").primaryKey(),
   hostToken: text("host_token").notNull(),
+  gameType: text("game_type").$type<GameType>().notNull().default("word"),
   phase: text("phase").notNull().default("lobby"),
   config: text("config", { mode: "json" }).$type<GameConfig>().notNull(),
   totalRounds: integer("total_rounds").notNull().default(0),
@@ -81,6 +82,10 @@ export const rounds = sqliteTable(
     pointsAwarded: integer("points_awarded").notNull().default(0),
     penalty: integer("penalty").notNull().default(0),
     scoreDelta: integer("score_delta").notNull().default(0),
+    choices: text("choices", { mode: "json" }).$type<string[]>().notNull().default([]),
+    selectedIndex: integer("selected_index"),
+    correctIndex: integer("correct_index"),
+    bankedPoints: integer("banked_points").notNull().default(0),
     createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => [index("round_room_idx").on(table.roomCode)],

@@ -19,6 +19,7 @@ export const CATEGORIES = [
 
 export const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 export const LANGUAGES = ["en", "tr"] as const;
+export const GAME_TYPES = ["word", "millionaire"] as const;
 export const GAME_MODES = ["individual", "team", "family", "tournament", "daily"] as const;
 export const PHASES = ["lobby", "question", "buzzer_open", "answering", "round_result", "finished"] as const;
 export const AVATARS = ["lion", "fox", "owl", "rocket", "star", "panda", "tiger", "koala", "dragon", "unicorn"] as const;
@@ -26,6 +27,7 @@ export const AVATARS = ["lion", "fox", "owl", "rocket", "star", "panda", "tiger"
 export type Category = (typeof CATEGORIES)[number];
 export type Difficulty = (typeof DIFFICULTIES)[number];
 export type Language = (typeof LANGUAGES)[number];
+export type GameType = (typeof GAME_TYPES)[number];
 export type GameMode = (typeof GAME_MODES)[number];
 export type Phase = (typeof PHASES)[number];
 export type Avatar = (typeof AVATARS)[number];

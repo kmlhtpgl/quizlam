@@ -7,7 +7,11 @@ import { SiteFooter, SiteHeader } from "./SiteHeader";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const immersive = pathname.startsWith("/tv/") || pathname.startsWith("/play/");
+  const immersive =
+    pathname.startsWith("/tv/") ||
+    pathname.startsWith("/play/") ||
+    pathname.startsWith("/mcq/tv/") ||
+    pathname.startsWith("/mcq/play/");
 
   return (
     <div className="relative min-h-screen">

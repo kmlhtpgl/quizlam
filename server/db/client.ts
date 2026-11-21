@@ -49,6 +49,7 @@ export function initializeDatabase(): void {
     CREATE TABLE IF NOT EXISTS rooms (
       code TEXT PRIMARY KEY NOT NULL,
       host_token TEXT NOT NULL,
+      game_type TEXT NOT NULL DEFAULT 'word',
       phase TEXT NOT NULL DEFAULT 'lobby',
       config TEXT NOT NULL,
       total_rounds INTEGER NOT NULL DEFAULT 0,
@@ -87,6 +88,10 @@ export function initializeDatabase(): void {
       points_awarded INTEGER NOT NULL DEFAULT 0,
       penalty INTEGER NOT NULL DEFAULT 0,
       score_delta INTEGER NOT NULL DEFAULT 0,
+      choices TEXT NOT NULL DEFAULT '[]',
+      selected_index INTEGER,
+      correct_index INTEGER,
+      banked_points INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -98,5 +103,16 @@ export function initializeDatabase(): void {
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  addColumn("rooms", "game_type", "TEXT NOT NULL DEFAULT 'word'");
+  addColumn("rounds", "choices", "TEXT NOT NULL DEFAULT '[]'");
+  addColumn("rounds", "selected_index", "INTEGER");
+  addColumn("rounds", "correct_index", "INTEGER");
+  addColumn("rounds", "banked_points", "INTEGER NOT NULL DEFAULT 0");
   initialized = true;
+}
+
+function addColumn(table: string, column: string, definition: string): void {
+  const columns = sqlite.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  if (columns.some((item) => item.name === column)) return;
+  sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
 }

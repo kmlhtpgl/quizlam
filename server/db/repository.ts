@@ -3,7 +3,8 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, initializeDatabase } from "./client";
 import { QUESTION_SEED } from "./questionSeed";
 import { players, questionTranslations, questions, rooms, rounds, settings } from "./schema";
-import type { GameConfig, Language, QuestionRecord, RoomSnapshot, RoundResult } from "@/lib/domain";
+import type { GameConfig, GameType, Language, QuestionRecord, RoomSnapshot, RoundResult } from "@/lib/domain";
+import { MCQ_LADDER, type McqConfig, type McqResult, type McqRoomSnapshot } from "@/lib/mcqDomain";
 
 export interface AdminQuestion extends QuestionRecord {
   createdAt: string;
@@ -161,41 +162,51 @@ export function deleteQuestion(id: string): void {
   db.delete(questions).where(eq(questions.id, id)).run();
 }
 
-export function saveRoomSnapshot(snapshot: RoomSnapshot): void {
+function persistRoomSnapshot(input: {
+  code: string;
+  hostToken: string | null;
+  gameType: GameType;
+  phase: string;
+  config: GameConfig;
+  totalRounds: number;
+  players: McqRoomSnapshot["players"];
+}): void {
   initializeDatabase();
   const now = new Date().toISOString();
   db.insert(rooms)
     .values({
-      code: snapshot.code,
-      hostToken: snapshot.hostToken ?? "",
-      phase: snapshot.phase,
-      config: snapshot.config,
-      totalRounds: snapshot.totalRounds,
+      code: input.code,
+      hostToken: input.hostToken ?? "",
+      gameType: input.gameType,
+      phase: input.phase,
+      config: input.config,
+      totalRounds: input.totalRounds,
       createdAt: now,
-      finishedAt: snapshot.phase === "finished" ? now : null,
+      finishedAt: input.phase === "finished" ? now : null,
     })
     .onConflictDoUpdate({
       target: rooms.code,
       set: {
-        phase: snapshot.phase,
-        config: snapshot.config,
-        totalRounds: snapshot.totalRounds,
-        finishedAt: snapshot.phase === "finished" ? now : null,
+        gameType: input.gameType,
+        phase: input.phase,
+        config: input.config,
+        totalRounds: input.totalRounds,
+        finishedAt: input.phase === "finished" ? now : null,
       },
     })
     .run();
-  for (const player of snapshot.players) {
+  for (const player of input.players) {
     db.insert(players)
       .values({
         id: player.id,
-        roomCode: snapshot.code,
+        roomCode: input.code,
         token: null,
         nickname: player.nickname,
         avatar: player.avatar,
         teamId: player.teamId,
         score: player.score,
         connected: player.connected,
-        isLocal: false,
+        isLocal: player.isLocal,
       })
       .onConflictDoUpdate({
         target: players.id,
@@ -211,14 +222,58 @@ export function saveRoomSnapshot(snapshot: RoomSnapshot): void {
   }
 }
 
+export function saveRoomSnapshot(snapshot: RoomSnapshot): void {
+  persistRoomSnapshot({
+    code: snapshot.code,
+    hostToken: snapshot.hostToken,
+    gameType: "word",
+    phase: snapshot.phase,
+    config: snapshot.config,
+    totalRounds: snapshot.totalRounds,
+    players: snapshot.players,
+  });
+}
+
+function mcqConfigToGameConfig(config: McqConfig): GameConfig {
+  return {
+    categories: [...config.categories],
+    difficulties: [...config.difficulties],
+    timerSeconds: config.timerSeconds,
+    rounds: MCQ_LADDER.length,
+    penalty: 0,
+    mode: "individual",
+    language: config.language,
+  };
+}
+
+export function saveMcqRoomSnapshot(snapshot: McqRoomSnapshot): void {
+  persistRoomSnapshot({
+    code: snapshot.code,
+    hostToken: snapshot.hostToken,
+    gameType: "millionaire",
+    phase: snapshot.phase,
+    config: mcqConfigToGameConfig(snapshot.config),
+    totalRounds: snapshot.totalRounds,
+    players: snapshot.players,
+  });
+}
+
+export interface HistoryRound extends RoundResult {
+  choices: string[];
+  selectedIndex: number | null;
+  correctIndex: number | null;
+  bankedPoints: number;
+}
+
 export interface HistoryGame {
   code: string;
+  gameType: GameType;
   phase: string;
   config: GameConfig;
   createdAt: string;
   finishedAt: string | null;
   scores: Array<{ nickname: string; score: number; avatar: string }>;
-  rounds: RoundResult[];
+  rounds: HistoryRound[];
 }
 
 export function getGameHistory(limit = 25): HistoryGame[] {
@@ -247,6 +302,7 @@ export function getGameHistory(limit = 25): HistoryGame[] {
     .all();
   return roomRows.map((room) => ({
     code: room.code,
+    gameType: room.gameType,
     phase: room.phase,
     config: room.config,
     createdAt: room.createdAt,
@@ -271,6 +327,10 @@ export function getGameHistory(limit = 25): HistoryGame[] {
         pointsAwarded: round.pointsAwarded,
         penalty: round.penalty,
         scoreDelta: round.scoreDelta,
+        choices: round.choices ?? [],
+        selectedIndex: round.selectedIndex ?? null,
+        correctIndex: round.correctIndex ?? null,
+        bankedPoints: round.bankedPoints ?? 0,
       })),
   }));
 }
@@ -294,6 +354,33 @@ export function saveRoundRecord(code: string, questionId: string, result: RoundR
       pointsAwarded: result.pointsAwarded,
       penalty: result.penalty,
       scoreDelta: result.scoreDelta,
+    })
+    .run();
+}
+
+export function saveMcqRoundRecord(code: string, questionId: string, result: McqResult): void {
+  initializeDatabase();
+  db.insert(rounds)
+    .values({
+      id: randomUUID(),
+      roomCode: code,
+      questionId,
+      round: result.round,
+      playerId: result.playerId,
+      playerName: result.playerName,
+      correct: result.correct,
+      timedOut: result.timedOut,
+      skipped: result.skipped,
+      answer: result.answer,
+      explanation: result.explanation,
+      source: result.source,
+      pointsAwarded: result.pointsAwarded,
+      penalty: result.penalty,
+      scoreDelta: result.scoreDelta,
+      choices: result.choices,
+      selectedIndex: result.selectedIndex,
+      correctIndex: result.correctIndex,
+      bankedPoints: result.bankedPoints,
     })
     .run();
 }

@@ -12,6 +12,7 @@ import { AvatarIcon } from "@/components/ui/Avatar";
 
 interface HistoryGame {
   code: string;
+  gameType: "word" | "millionaire";
   phase: string;
   config: { mode: string; language: string; rounds: number };
   createdAt: string;
@@ -53,13 +54,19 @@ export default function HistoryPage() {
       ) : (
         <div className="mt-8 space-y-4">
           {games.map((game) => (
-            <Link key={game.code} href={`/results/${game.code}`} className="block">
+            <Link
+              key={game.code}
+              href={game.gameType === "millionaire" ? `/mcq/results/${game.code}` : `/results/${game.code}`}
+              className="block"
+            >
               <Card className="flex flex-col gap-4 transition hover:border-gold/30 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill tone="gold">{game.code}</Pill>
+                    <Pill tone="neutral">
+                      {game.gameType === "millionaire" ? t("common.millionaireGame") : t("common.wordGame")}
+                    </Pill>
                     <Pill tone={game.phase === "finished" ? "emerald" : "neutral"}>{game.phase}</Pill>
-                    <span className="text-xs text-cream/45">{game.config.mode}</span>
                   </div>
                   <p className="mt-3 flex items-center gap-2 text-sm text-cream/55">
                     <CalendarDays size={15} />
