@@ -5,8 +5,10 @@ import { handleApi } from "./api";
 import { ensureSeeded, getQuestionBank } from "./db/repository";
 import { GameEngine } from "./game/engine";
 import { McqEngine } from "./game/mcqEngine";
+import { BattleEngine } from "./game/battleEngine";
 import { setupSockets } from "./sockets";
 import { setupMcqSockets } from "./socketsMcq";
+import { setupBattleSockets } from "./socketsBattle";
 
 const port = Number(process.env.PORT ?? 3000);
 const dev = process.env.NODE_ENV !== "production";
@@ -16,6 +18,7 @@ const handleNext = app.getRequestHandler();
 ensureSeeded();
 const engine = new GameEngine();
 const mcqEngine = new McqEngine();
+const battleEngine = new BattleEngine();
 const questionBank = getQuestionBank();
 
 app.prepare().then(() => {
@@ -40,6 +43,7 @@ app.prepare().then(() => {
 
   setupSockets(io, engine, questionBank);
   setupMcqSockets(io, mcqEngine, questionBank);
+  setupBattleSockets(io, battleEngine, questionBank);
 
   server.listen(port, () => {
     console.log(`Quizlam running at http://localhost:${port}`);

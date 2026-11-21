@@ -92,6 +92,10 @@ export function initializeDatabase(): void {
       selected_index INTEGER,
       correct_index INTEGER,
       banked_points INTEGER NOT NULL DEFAULT 0,
+      response_ms INTEGER,
+      speed_bonus INTEGER NOT NULL DEFAULT 0,
+      streak_bonus INTEGER NOT NULL DEFAULT 0,
+      streak_count INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -108,6 +112,10 @@ export function initializeDatabase(): void {
   addColumn("rounds", "selected_index", "INTEGER");
   addColumn("rounds", "correct_index", "INTEGER");
   addColumn("rounds", "banked_points", "INTEGER NOT NULL DEFAULT 0");
+  addColumn("rounds", "response_ms", "INTEGER");
+  addColumn("rounds", "speed_bonus", "INTEGER NOT NULL DEFAULT 0");
+  addColumn("rounds", "streak_bonus", "INTEGER NOT NULL DEFAULT 0");
+  addColumn("rounds", "streak_count", "INTEGER NOT NULL DEFAULT 0");
   initialized = true;
 }
 

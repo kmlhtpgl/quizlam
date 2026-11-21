@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, Gamepad2, Languages, Radio, Sparkles, Trophy, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Gamepad2, Languages, Radio, Sparkles, Swords, Trophy, Users } from "lucide-react";
 import { LogoLockup } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/Button";
 import { useApp } from "@/components/layout/Providers";
@@ -58,7 +58,7 @@ export default function HomePage() {
       <section className="mt-14">
         <h2 className="text-center text-2xl font-black text-cream sm:text-3xl">{t("games.title")}</h2>
         <p className="mt-2 text-center text-sm text-cream/55">{t("games.subtitle")}</p>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <div className="mt-6 grid gap-5 md:grid-cols-3">
           <Link href="/create" className="glass-card flex items-center gap-5 rounded-3xl p-6 transition hover:-translate-y-1 hover:border-gold/30">
             <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gold/15 text-gold">
               <Gamepad2 size={28} />
@@ -75,6 +75,15 @@ export default function HomePage() {
             <div>
               <h3 className="text-xl font-black text-cream">{t("games.millionaireTitle")}</h3>
               <p className="mt-1 text-sm text-cream/55">{t("games.millionaireBody")}</p>
+            </div>
+          </Link>
+          <Link href="/battle/create" className="glass-card flex items-center gap-5 rounded-3xl p-6 transition hover:-translate-y-1 hover:border-gold/30">
+            <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-300">
+              <Swords size={28} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-cream">{t("games.battleTitle")}</h3>
+              <p className="mt-1 text-sm text-cream/55">{t("games.battleBody")}</p>
             </div>
           </Link>
         </div>

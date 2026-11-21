@@ -7,7 +7,7 @@ let pendingMusicKind: MusicKind | null = null;
 const activeCues = new Set<HTMLAudioElement>();
 const lastTracks: Partial<Record<TrackKind, string>> = {};
 
-export type SoundKind = "join" | "start" | "buzz" | "reveal" | "correct" | "wrong" | "timeout" | "tick" | "win";
+export type SoundKind = "join" | "start" | "buzz" | "question" | "reveal" | "correct" | "wrong" | "timeout" | "tick" | "win";
 export type MusicKind = "lobby" | "question";
 type TrackKind = MusicKind | "correct" | "wrong";
 type SynthSoundKind = Exclude<SoundKind, "correct" | "wrong" | "timeout">;
@@ -142,6 +142,10 @@ export function soundForEvent(event: EngineEvent): SoundKind | null {
       return "buzz";
     case "letter:revealed":
       return "reveal";
+    case "battle:question":
+      return "question";
+    case "battle:reveal":
+      return "reveal";
     case "game:finished":
       return "win";
     case "answer:result": {
@@ -183,6 +187,10 @@ export function playSound(kind: SoundKind, enabled: boolean): void {
     buzz: [
       { frequency: 660, delay: 0, duration: 0.1 },
       { frequency: 990, delay: 0.1, duration: 0.16 },
+    ],
+    question: [
+      { frequency: 523, delay: 0, duration: 0.1 },
+      { frequency: 784, delay: 0.1, duration: 0.16 },
     ],
     reveal: [{ frequency: 880, delay: 0, duration: 0.12 }],
     tick: [{ frequency: 1100, delay: 0, duration: 0.045 }],

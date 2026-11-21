@@ -4,6 +4,7 @@ import { db, initializeDatabase } from "./client";
 import { QUESTION_SEED } from "./questionSeed";
 import { players, questionTranslations, questions, rooms, rounds, settings } from "./schema";
 import type { GameConfig, GameType, Language, QuestionRecord, RoomSnapshot, RoundResult } from "@/lib/domain";
+import type { BattleResult, BattleRoomSnapshot } from "@/lib/battleDomain";
 import { MCQ_LADDER, type McqConfig, type McqResult, type McqRoomSnapshot } from "@/lib/mcqDomain";
 
 export interface AdminQuestion extends QuestionRecord {
@@ -258,11 +259,39 @@ export function saveMcqRoomSnapshot(snapshot: McqRoomSnapshot): void {
   });
 }
 
+export function saveBattleRoomSnapshot(snapshot: BattleRoomSnapshot): void {
+  persistRoomSnapshot({
+    code: snapshot.code,
+    hostToken: snapshot.hostToken,
+    gameType: "battle",
+    phase: snapshot.phase,
+    config: {
+      categories: [...snapshot.config.categories],
+      difficulties: [...snapshot.config.difficulties],
+      timerSeconds: ([15, 30, 45, 60] as number[]).includes(snapshot.config.timerSeconds)
+        ? (snapshot.config.timerSeconds as GameConfig["timerSeconds"])
+        : 30,
+      rounds: snapshot.config.rounds,
+      penalty: 0,
+      mode: "individual",
+      language: snapshot.config.language,
+    },
+    totalRounds: snapshot.totalRounds,
+    players: snapshot.players,
+  });
+}
+
 export interface HistoryRound extends RoundResult {
   choices: string[];
   selectedIndex: number | null;
+  selectedText: string | null;
   correctIndex: number | null;
   bankedPoints: number;
+  responseMs: number | null;
+  speedBonus: number;
+  streakBonus: number;
+  streakCount: number;
+  totalPoints: number;
 }
 
 export interface HistoryGame {
@@ -329,8 +358,14 @@ export function getGameHistory(limit = 25): HistoryGame[] {
         scoreDelta: round.scoreDelta,
         choices: round.choices ?? [],
         selectedIndex: round.selectedIndex ?? null,
+        selectedText: round.selectedIndex === null ? null : (round.choices?.[round.selectedIndex] ?? null),
         correctIndex: round.correctIndex ?? null,
         bankedPoints: round.bankedPoints ?? 0,
+        responseMs: round.responseMs ?? null,
+        speedBonus: round.speedBonus ?? 0,
+        streakBonus: round.streakBonus ?? 0,
+        streakCount: round.streakCount ?? 0,
+        totalPoints: round.scoreDelta ?? 0,
       })),
   }));
 }
@@ -381,6 +416,37 @@ export function saveMcqRoundRecord(code: string, questionId: string, result: Mcq
       selectedIndex: result.selectedIndex,
       correctIndex: result.correctIndex,
       bankedPoints: result.bankedPoints,
+    })
+    .run();
+}
+
+export function saveBattleRoundRecord(code: string, questionId: string, result: BattleResult): void {
+  initializeDatabase();
+  db.insert(rounds)
+    .values({
+      id: randomUUID(),
+      roomCode: code,
+      questionId,
+      round: result.round,
+      playerId: result.playerId,
+      playerName: result.playerName,
+      correct: result.correct,
+      timedOut: result.timedOut,
+      skipped: result.skipped,
+      answer: result.answer,
+      explanation: result.explanation,
+      source: result.source,
+      pointsAwarded: result.pointsAwarded,
+      penalty: result.penalty,
+      scoreDelta: result.scoreDelta,
+      choices: result.choices,
+      selectedIndex: result.selectedIndex,
+      correctIndex: result.correctIndex,
+      bankedPoints: result.totalPoints,
+      responseMs: result.responseMs,
+      speedBonus: result.speedBonus,
+      streakBonus: result.streakBonus,
+      streakCount: result.streakCount,
     })
     .run();
 }

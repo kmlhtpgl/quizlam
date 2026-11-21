@@ -11,7 +11,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/tv/") ||
     pathname.startsWith("/play/") ||
     pathname.startsWith("/mcq/tv/") ||
-    pathname.startsWith("/mcq/play/");
+    pathname.startsWith("/mcq/play/") ||
+    pathname.startsWith("/battle/tv/") ||
+    pathname.startsWith("/battle/play/");
 
   return (
     <div className="relative min-h-screen">

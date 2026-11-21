@@ -12,13 +12,13 @@ import { AvatarIcon } from "@/components/ui/Avatar";
 
 interface HistoryGame {
   code: string;
-  gameType: "word" | "millionaire";
+  gameType?: string;
   phase: string;
-  config: { mode: string; language: string; rounds: number };
+  config?: { mode: string; language: string; rounds: number };
   createdAt: string;
   finishedAt: string | null;
-  scores: Array<{ nickname: string; score: number; avatar: string }>;
-  rounds: RoundResult[];
+  scores?: Array<{ nickname: string; score: number; avatar: string }>;
+  rounds?: RoundResult[];
 }
 
 export default function HistoryPage() {
@@ -56,15 +56,25 @@ export default function HistoryPage() {
           {games.map((game) => (
             <Link
               key={game.code}
-              href={game.gameType === "millionaire" ? `/mcq/results/${game.code}` : `/results/${game.code}`}
+              href={
+                game.gameType === "battle"
+                  ? `/battle/results/${game.code}`
+                  : game.gameType === "millionaire"
+                    ? `/mcq/results/${game.code}`
+                    : `/results/${game.code}`
+              }
               className="block"
             >
               <Card className="flex flex-col gap-4 transition hover:border-gold/30 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill tone="gold">{game.code}</Pill>
-                    <Pill tone="neutral">
-                      {game.gameType === "millionaire" ? t("common.millionaireGame") : t("common.wordGame")}
+                    <Pill tone={game.gameType === "battle" ? "danger" : "neutral"}>
+                      {game.gameType === "battle"
+                        ? t("common.battleGame")
+                        : game.gameType === "millionaire"
+                          ? t("common.millionaireGame")
+                          : t("common.wordGame")}
                     </Pill>
                     <Pill tone={game.phase === "finished" ? "emerald" : "neutral"}>{game.phase}</Pill>
                   </div>
@@ -73,7 +83,7 @@ export default function HistoryPage() {
                     {new Date(game.finishedAt ?? game.createdAt).toLocaleString()}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-3">
-                    {game.scores.slice(0, 4).map((score, index) => (
+                    {(Array.isArray(game.scores) ? game.scores : []).slice(0, 4).map((score, index) => (
                       <div key={`${score.nickname}-${index}`} className="flex items-center gap-2 rounded-xl bg-white/5 px-2 py-1.5">
                         <AvatarIcon
                           avatar={(AVATARS.includes(score.avatar as Avatar) ? score.avatar : "star") as Avatar}
@@ -89,7 +99,7 @@ export default function HistoryPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-bold uppercase tracking-widest text-cream/40">{t("results.rounds")}</p>
-                  <p className="text-2xl font-black text-cream">{game.rounds.length}</p>
+                  <p className="text-2xl font-black text-cream">{Array.isArray(game.rounds) ? game.rounds.length : 0}</p>
                   <ChevronRight size={20} className="ml-auto mt-2 text-gold" />
                 </div>
               </Card>

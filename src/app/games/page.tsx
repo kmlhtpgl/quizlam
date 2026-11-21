@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Gamepad2, Trophy } from "lucide-react";
+import { ArrowRight, Gamepad2, Swords, Trophy } from "lucide-react";
 import { useApp } from "@/components/layout/Providers";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -26,6 +26,14 @@ export default function GamesPage() {
       body: t("games.millionaireBody"),
       action: t("games.millionaireAction"),
     },
+    {
+      href: "/battle/create",
+      icon: Swords,
+      badge: t("games.battleBadge"),
+      title: t("games.battleTitle"),
+      body: t("games.battleBody"),
+      action: t("games.battleAction"),
+    },
   ];
 
   return (
@@ -34,7 +42,7 @@ export default function GamesPage() {
         <h1 className="text-4xl font-black text-cream sm:text-5xl">{t("games.title")}</h1>
         <p className="mt-3 text-cream/60">{t("games.subtitle")}</p>
       </div>
-      <div className="mt-10 grid gap-6 md:grid-cols-2">
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
         {games.map((game) => {
           const Icon = game.icon;
           return (
