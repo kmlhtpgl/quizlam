@@ -19,7 +19,7 @@ interface LocalPlayer {
 export default function CreatePage() {
   const router = useRouter();
   const { t, defaults, language } = useApp();
-  const [config, setConfig] = useState<GameConfig>({ ...defaults, language });
+  const [config, setConfig] = useState<GameConfig>(() => ({ ...defaults, categories: [], language }));
   const [localPlayers, setLocalPlayers] = useState<LocalPlayer[]>([
     { nickname: "Ekrem", avatar: "lion" },
     { nickname: "Zeynep", avatar: "star" },
