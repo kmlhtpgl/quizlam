@@ -261,6 +261,8 @@ export class McqEngine {
           aliases: translation.aliases,
           category: record.category,
           difficulty: record.difficulty,
+          prompt: translation.prompt,
+          explanation: translation.explanation,
         };
       });
   }
