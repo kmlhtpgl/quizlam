@@ -181,6 +181,18 @@ export default function McqPlayerPage() {
                   />
                 </div>
               )}
+              {snapshot.phase === "answer_result" && (
+                <div className="mt-5 flex flex-col items-center gap-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-cream/60">{t("mcq.player.nextQuestionIn")}</p>
+                  <CircularTimer
+                    endsAt={snapshot.nextQuestionAt}
+                    remainingMs={snapshot.resultHoldMs}
+                    paused={false}
+                    totalSeconds={Math.round(snapshot.resultHoldMs / 1000)}
+                    size={84}
+                  />
+                </div>
+              )}
             </div>
           )}
 

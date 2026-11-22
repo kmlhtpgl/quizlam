@@ -135,7 +135,16 @@ export default function McqTvPage() {
                 </div>
               )}
               {snapshot.phase === "answer_result" && (
-                <p className="mt-7 text-xl font-bold uppercase tracking-[0.18em] text-cream/60">{t("mcq.tv.nextQuestion")}</p>
+                <div className="mt-7 flex flex-col items-center gap-2">
+                  <p className="text-xl font-bold uppercase tracking-[0.18em] text-cream/60">{t("mcq.tv.nextQuestionIn")}</p>
+                  <CircularTimer
+                    endsAt={snapshot.nextQuestionAt}
+                    remainingMs={snapshot.resultHoldMs}
+                    paused={false}
+                    totalSeconds={Math.round(snapshot.resultHoldMs / 1000)}
+                    size={120}
+                  />
+                </div>
               )}
             </div>
           )}

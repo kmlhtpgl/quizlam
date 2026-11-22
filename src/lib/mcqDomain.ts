@@ -3,6 +3,7 @@ import type { Avatar, Category, Difficulty, EngineEvent, Language, PlayerView, Q
 export const MCQ_PHASES = ["lobby", "contestant", "question", "answer_result", "finished"] as const;
 export const MCQ_LADDER = [100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000] as const;
 export const MCQ_MILESTONES = [4, 9] as const;
+export const MCQ_RESULT_HOLD_MS = 5000;
 
 export type McqPhase = (typeof MCQ_PHASES)[number];
 
@@ -64,6 +65,8 @@ export interface McqRoomSnapshot {
   fiftyFiftyUsed: boolean;
   turnEndsAt: number | null;
   remainingMs: number | null;
+  nextQuestionAt: number | null;
+  resultHoldMs: number;
   lastResult: McqResult | null;
   history: McqResult[];
   winners: string[];

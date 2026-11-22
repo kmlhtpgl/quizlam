@@ -12,6 +12,7 @@ import {
   MCQ_DEFAULT_CONFIG,
   MCQ_LADDER,
   MCQ_MILESTONES,
+  MCQ_RESULT_HOLD_MS,
   type McqConfig,
   type McqCreateInput,
   type McqQuestionView,
@@ -59,6 +60,7 @@ interface InternalRoom {
   activePlayerId: string | null;
   turnEndsAt: number | null;
   remainingMs: number | null;
+  nextQuestionAt: number | null;
   timer: unknown | null;
   fiftyFiftyUsed: boolean;
   bankedPoints: number;
@@ -157,6 +159,7 @@ export class McqEngine {
   private clearTimerFn: (handle: unknown) => void;
   private createCode: () => string;
   private createId: (prefix: string) => string;
+  private eventSink: ((events: EngineEvent[], code: string) => void) | null = null;
 
   constructor(options: McqEngineOptions = {}) {
     this.now = options.now ?? Date.now;
@@ -167,8 +170,16 @@ export class McqEngine {
     this.createId = options.createId ?? ((prefix) => defaultId(prefix));
   }
 
+  setEventSink(sink: ((events: EngineEvent[], code: string) => void) | null): void {
+    this.eventSink = sink;
+  }
+
   private event(type: EngineEvent["type"], code: string, payload?: Record<string, unknown>): EngineEvent {
     return { type, code, payload };
+  }
+
+  private publish(events: EngineEvent[], code: string): void {
+    this.eventSink?.(events, code);
   }
 
   private room(code: string): InternalRoom {
@@ -247,7 +258,31 @@ export class McqEngine {
     if (room.phase !== "question" || room.paused) return;
     const ms = Math.max(0, room.remainingMs ?? room.config.timerSeconds * 1000);
     room.turnEndsAt = this.now() + ms;
+    room.nextQuestionAt = null;
     room.timer = this.setTimer(() => this.onTimeout(room.code), ms);
+  }
+
+  private armResultTimer(room: InternalRoom): void {
+    this.clearTimer(room);
+    if (room.phase !== "answer_result") return;
+    const endsAt = this.now() + MCQ_RESULT_HOLD_MS;
+    room.nextQuestionAt = endsAt;
+    room.turnEndsAt = endsAt;
+    room.remainingMs = MCQ_RESULT_HOLD_MS;
+    room.timer = this.setTimer(() => this.onResultTimeout(room.code, room.roundIndex, endsAt), MCQ_RESULT_HOLD_MS);
+  }
+
+  private advance(room: InternalRoom): McqEngineResult<null> {
+    this.clearTimer(room);
+    room.nextQuestionAt = null;
+    room.turnEndsAt = null;
+    room.remainingMs = null;
+    room.roundIndex += 1;
+    this.startQuestion(room);
+    return {
+      value: null,
+      events: [this.event("round:available", room.code, { round: room.roundIndex + 1, totalRounds: room.selectedQuestions.length })],
+    };
   }
 
   private candidatePool(room: InternalRoom): McqDistractorCandidate[] {
@@ -306,7 +341,16 @@ export class McqEngine {
   private onTimeout(code: string): void {
     const room = this.rooms.get(code);
     if (!room || room.phase !== "question" || room.paused || !room.activePlayerId) return;
-    this.resolve(code, room.activePlayerId, null, true, `timeout:${room.roundIndex}`);
+    const result = this.resolve(code, room.activePlayerId, null, true, `timeout:${room.roundIndex}`);
+    this.publish(result.events, code);
+  }
+
+  private onResultTimeout(code: string, roundIndex: number, expectedEnd: number): void {
+    const room = this.rooms.get(code);
+    if (!room || room.phase !== "answer_result") return;
+    if (room.roundIndex !== roundIndex || room.nextQuestionAt !== expectedEnd) return;
+    const advanced = this.advance(room);
+    this.publish(advanced.events, code);
   }
 
   private resolve(code: string, playerId: string, choice: number | null, timedOut: boolean, key: string): McqEngineResult<McqResult> {
@@ -320,6 +364,7 @@ export class McqEngine {
 
     room.submissionKeys.add(key);
     this.clearTimer(room);
+    room.nextQuestionAt = null;
     room.turnEndsAt = null;
     room.remainingMs = null;
 
@@ -362,8 +407,10 @@ export class McqEngine {
     const isLastQuestion = room.roundIndex >= room.selectedQuestions.length - 1;
     if (correct && !isLastQuestion) {
       room.phase = "answer_result";
+      this.armResultTimer(room);
     } else {
       room.phase = "finished";
+      room.nextQuestionAt = null;
       events.push(this.event("game:finished", code, { gameType: "millionaire", winnerId: player.id }));
     }
     return { value: result, events };
@@ -390,6 +437,7 @@ export class McqEngine {
       activePlayerId: null,
       turnEndsAt: null,
       remainingMs: null,
+      nextQuestionAt: null,
       timer: null,
       fiftyFiftyUsed: false,
       bankedPoints: 0,
@@ -493,10 +541,14 @@ export class McqEngine {
     const room = this.verifyHost(code, hostToken);
     if (room.phase === "question" || room.phase === "answer_result") throw new Error("RUN_IN_PROGRESS");
     this.player(room, playerId);
+    this.clearTimer(room);
     room.activePlayerId = playerId;
     room.phase = "contestant";
     room.currentQuestion = null;
     room.lastResult = null;
+    room.nextQuestionAt = null;
+    room.turnEndsAt = null;
+    room.remainingMs = null;
     room.roundIndex = 0;
     room.bankedPoints = 0;
     room.fiftyFiftyUsed = false;
@@ -518,6 +570,8 @@ export class McqEngine {
     room.history = [];
     room.lastResult = null;
     room.paused = false;
+    this.clearTimer(room);
+    room.nextQuestionAt = null;
     this.startQuestion(room);
     return {
       value: null,
@@ -559,12 +613,7 @@ export class McqEngine {
     const room = this.verifyHost(code, hostToken);
     if (room.phase !== "answer_result") throw new Error("NO_RESULT_TO_ADVANCE");
     if (room.roundIndex >= room.selectedQuestions.length - 1) throw new Error("LAST_QUESTION");
-    room.roundIndex += 1;
-    this.startQuestion(room);
-    return {
-      value: null,
-      events: [this.event("round:available", code, { round: room.roundIndex + 1, totalRounds: room.selectedQuestions.length })],
-    };
+    return this.advance(room);
   }
 
   resetRun(code: string, hostToken: string): McqEngineResult<null> {
@@ -580,6 +629,7 @@ export class McqEngine {
     room.fiftyFiftyUsed = false;
     room.eliminated = new Set();
     room.lastResult = null;
+    room.nextQuestionAt = null;
     room.turnEndsAt = null;
     room.remainingMs = null;
     room.submissionKeys = new Set();
@@ -642,6 +692,8 @@ export class McqEngine {
       fiftyFiftyUsed: room.fiftyFiftyUsed,
       turnEndsAt: room.turnEndsAt,
       remainingMs: this.remaining(room),
+      nextQuestionAt: room.nextQuestionAt,
+      resultHoldMs: MCQ_RESULT_HOLD_MS,
       lastResult: room.lastResult,
       history: [...room.history],
       winners: [...winners],

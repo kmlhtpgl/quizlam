@@ -74,6 +74,8 @@ export function setupMcqSockets(io: IOServer, engine: McqEngine, questionBank: Q
     emitSnapshots(code);
   }
 
+  engine.setEventSink((events, code) => apply(events, code));
+
   function authorizeHost(socket: Socket, code: string, supplied?: string): boolean {
     const token = supplied ?? socket.data.mcqHostToken;
     return Boolean(token && token === engine.getHostToken(code));

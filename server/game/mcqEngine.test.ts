@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { QuestionRecord } from "@/lib/domain";
+import type { EngineEvent, QuestionRecord } from "@/lib/domain";
 import { MCQ_LADDER } from "@/lib/mcqDomain";
 import { McqEngine } from "./mcqEngine";
 
@@ -25,6 +25,7 @@ function fixture() {
   let idCounter = 0;
   let timerCounter = 0;
   const timers = new Map<number, () => void>();
+  const published: EngineEvent[] = [];
 
   const engine = new McqEngine({
     now: () => now,
@@ -40,6 +41,7 @@ function fixture() {
     createCode: () => "MQTEST",
     createId: (prefix) => `${prefix}_${++idCounter}`,
   });
+  engine.setEventSink((events) => published.push(...events));
 
   const created = engine.createRoom({
     questionBank: BANK,
@@ -69,6 +71,7 @@ function fixture() {
     hostToken,
     firstId,
     secondId,
+    published,
     host: () => engine.getSnapshot(code, { hostToken }),
     player: () => engine.getSnapshot(code),
     fireTimers: () => {
@@ -107,6 +110,38 @@ describe("McqEngine", () => {
     expect(room.host().phase).toBe("answer_result");
     expect(room.host().bankedPoints).toBe(MCQ_LADDER[0]);
     expect(room.host().players.find((player) => player.id === room.firstId)?.score).toBe(MCQ_LADDER[0]);
+  });
+
+  it("auto-advances to the next question after the result hold", () => {
+    const room = fixture();
+    const startRound = room.host().roundIndex;
+    const correctIndex = room.host().question!.correctIndex!;
+    room.engine.answer(room.code, room.firstId, correctIndex, "auto-advance-1");
+
+    expect(room.host().phase).toBe("answer_result");
+    expect(room.host().nextQuestionAt).not.toBeNull();
+
+    room.fireTimers();
+
+    expect(room.host().phase).toBe("question");
+    expect(room.host().roundIndex).toBe(startRound + 1);
+    expect(room.host().nextQuestionAt).toBeNull();
+    expect(room.published.some((event) => event.type === "round:available")).toBe(true);
+  });
+
+  it("cancels the pending auto-advance when the host skips the result", () => {
+    const room = fixture();
+    const startRound = room.host().roundIndex;
+    const correctIndex = room.host().question!.correctIndex!;
+    room.engine.answer(room.code, room.firstId, correctIndex, "skip-result-1");
+    room.engine.nextQuestion(room.code, room.hostToken);
+
+    expect(room.host().roundIndex).toBe(startRound + 1);
+
+    room.fireTimers();
+
+    expect(room.host().roundIndex).toBe(startRound + 1);
+    expect(room.host().lastResult?.timedOut).toBe(true);
   });
 
   it("allows only the selected contestant to answer", () => {
@@ -161,6 +196,31 @@ describe("McqEngine", () => {
     expect(snapshot.phase).toBe("finished");
     expect(snapshot.lastResult?.timedOut).toBe(true);
     expect(snapshot.bankedPoints).toBe(0);
+  });
+
+  it("publishes timer-driven resolution events", () => {
+    const room = fixture();
+    room.fireTimers();
+
+    const types = room.published.map((event) => event.type);
+    expect(types).toContain("answer:result");
+    expect(types).toContain("game:finished");
+  });
+
+  it("does not schedule auto-advance after the final question", () => {
+    const room = fixture();
+    for (let round = 0; round < BANK.length; round += 1) {
+      const correctIndex = room.host().question!.correctIndex!;
+      room.engine.answer(room.code, room.firstId, correctIndex, `final-correct-${round}`);
+      if (round < BANK.length - 1) room.engine.nextQuestion(room.code, room.hostToken);
+    }
+
+    expect(room.host().phase).toBe("finished");
+    expect(room.host().nextQuestionAt).toBeNull();
+
+    room.fireTimers();
+
+    expect(room.host().roundIndex).toBe(BANK.length - 1);
   });
 
   it("pauses and resumes the question timer", () => {

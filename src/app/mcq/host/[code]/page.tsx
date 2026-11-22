@@ -13,6 +13,7 @@ import { Pill } from "@/components/ui/Pill";
 import { AvatarIcon } from "@/components/ui/Avatar";
 import { QRCodeImage } from "@/components/ui/QRCodeImage";
 import { Scoreboard } from "@/components/game/Scoreboard";
+import { CircularTimer } from "@/components/game/CircularTimer";
 import { GameEventSounds } from "@/components/game/GameEventSounds";
 import { McqBackgroundMusic } from "@/components/mcq/McqBackgroundMusic";
 import { McqOptions } from "@/components/mcq/McqOptions";
@@ -143,6 +144,16 @@ export default function McqHostPage() {
             {snapshot.phase === "answer_result" && snapshot.lastResult && (
               <div className="mt-6">
                 <McqResultCard result={snapshot.lastResult} />
+                <div className="mt-5 flex flex-col items-center gap-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-cream/60">{t("mcq.host.autoAdvance")}</p>
+                  <CircularTimer
+                    endsAt={snapshot.nextQuestionAt}
+                    remainingMs={snapshot.resultHoldMs}
+                    paused={false}
+                    totalSeconds={Math.round(snapshot.resultHoldMs / 1000)}
+                    size={92}
+                  />
+                </div>
               </div>
             )}
 
@@ -185,7 +196,7 @@ export default function McqHostPage() {
               )}
               {snapshot.phase === "answer_result" && (
                 <Button variant="gold" onClick={() => void run("mcq:next", { code, hostToken })}>
-                  {t("mcq.host.next")}
+                  {t("mcq.host.nextNow")}
                 </Button>
               )}
               {snapshot.phase === "finished" && (
